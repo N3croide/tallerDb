@@ -1085,33 +1085,53 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    nombre del departamento.
 
    ```mysql
-   select e.codigo as ID, e.nombre as Nombre, concat(e.apellido1,' ',ifnull(e.apellido2,'')) AS Apellidos, e.codigo_depto as IdDpto, d.nombre as NombreDepto, d.presupuesto as PresupuestoDpto, d.gastos as GastosDpto
-   from empleado e
-   right join
-       departamento d on e.codigo_depto = d.codigo
-   order by
-       d.nombre asc;
+   SELECT e.codigo AS ID,
+               e.nombre AS Nombre,
+               CONCAT(e.apellido1, ' ', IFNULL(e.apellido2, '')) AS Apellidos,
+               e.codigo_depto AS IdDpto,
+               d.nombre AS NombreDepto,
+               d.presupuesto AS PresupuestoDpto,
+               d.gastos AS GastosDpto
+        FROM empleado e
+        LEFT JOIN departamento d ON e.codigo_depto = d.codigo
+        UNION
+        SELECT NULL AS ID,
+               NULL AS Nombre,
+               NULL AS Apellidos,
+               d.codigo AS IdDpto,
+               d.nombre AS NombreDepto,
+               d.presupuesto AS PresupuestoDpto,
+               d.gastos AS GastosDpto
+        FROM departamento d
+        RIGHT JOIN empleado e ON e.codigo_depto = d.codigo
+        ORDER BY NombreDepto ASC;
+   
    ```
 
    ```
-   +----+--------------+----------------+--------+------------------+-----------------+------------+
-   | ID | Nombre       | Apellidos      | IdDpto | NombreDepto      | PresupuestoDpto | GastosDpto |
-   +----+--------------+----------------+--------+------------------+-----------------+------------+
-   | 12 | Irene        | Salas Flores   |   NULL | NULL             |            NULL |       NULL |
-   | 13 | Juan Antonio | Sáez Guerrero  |   NULL | NULL             |            NULL |       NULL |
-   |  4 | Adrián       | Suárez         |      4 | Contabilidad     |          110000 |       3000 |
-   |  1 | Aarón        | Rivero Gómez   |      1 | Desarrollo       |          120000 |       6000 |
-   |  6 | María        | Santana Moreno |      1 | Desarrollo       |          120000 |       6000 |
-   | 11 | Marta        | Herrera Gil    |      1 | Desarrollo       |          120000 |       6000 |
-   |  5 | Marcos       | Loyola Méndez  |      5 | I+D              |          375000 |     380000 |
-   | 10 | Diego        | Flores Salas   |      5 | I+D              |          375000 |     380000 |
-   |  3 | Adolfo       | Rubio Flores   |      3 | Recursos Humanos |          280000 |      25000 |
-   |  8 | Pepe         | Ruiz Santana   |      3 | Recursos Humanos |          280000 |      25000 |
-   |  2 | Adela        | Salas Díaz     |      2 | Sistemas         |          150000 |      21000 |
-   |  7 | Pilar        | Ruiz           |      2 | Sistemas         |          150000 |      21000 |
-   |  9 | Juan         | Gómez López    |      2 | Sistemas         |          150000 |      21000 |
-   +----+--------------+----------------+--------+------------------+-----------------+------------+
-   13 rows in set (0.00 sec)
+   +------+--------------+----------------+--------+------------------+-----------------+------------+
+   | ID   | Nombre       | Apellidos      | IdDpto | NombreDepto      | PresupuestoDpto | GastosDpto |
+   +------+--------------+----------------+--------+------------------+-----------------+------------+
+   | NULL | NULL         | NULL           |   NULL | NULL             |            NULL |       NULL |
+   |   13 | Juan Antonio | Sáez Guerrero  |   NULL | NULL             |            NULL |       NULL |
+   |   12 | Irene        | Salas Flores   |   NULL | NULL             |            NULL |       NULL |
+   | NULL | NULL         | NULL           |      4 | Contabilidad     |          110000 |       3000 |
+   |    4 | Adrián       | Suárez         |      4 | Contabilidad     |          110000 |       3000 |
+   | NULL | NULL         | NULL           |      1 | Desarrollo       |          120000 |       6000 |
+   |    6 | María        | Santana Moreno |      1 | Desarrollo       |          120000 |       6000 |
+   |    1 | Aarón        | Rivero Gómez   |      1 | Desarrollo       |          120000 |       6000 |
+   |   11 | Marta        | Herrera Gil    |      1 | Desarrollo       |          120000 |       6000 |
+   |   10 | Diego        | Flores Salas   |      5 | I+D              |          375000 |     380000 |
+   | NULL | NULL         | NULL           |      5 | I+D              |          375000 |     380000 |
+   |    5 | Marcos       | Loyola Méndez  |      5 | I+D              |          375000 |     380000 |
+   |    8 | Pepe         | Ruiz Santana   |      3 | Recursos Humanos |          280000 |      25000 |
+   | NULL | NULL         | NULL           |      3 | Recursos Humanos |          280000 |      25000 |
+   |    3 | Adolfo       | Rubio Flores   |      3 | Recursos Humanos |          280000 |      25000 |
+   |    9 | Juan         | Gómez López    |      2 | Sistemas         |          150000 |      21000 |
+   |    7 | Pilar        | Ruiz           |      2 | Sistemas         |          150000 |      21000 |
+   | NULL | NULL         | NULL           |      2 | Sistemas         |          150000 |      21000 |
+   |    2 | Adela        | Salas Díaz     |      2 | Sistemas         |          150000 |      21000 |
+   +------+--------------+----------------+--------+------------------+-----------------+------------+
    ```
 
    
@@ -1121,25 +1141,40 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    Ordene el listado alfabéticamente por el nombre del departamento.
 
    ```mysql
-   SELECT 
-       e.codigo AS IdEmpleado, 
-       e.nif AS Nif, 
-       e.nombre AS NombreEmpleado, 
-       CONCAT(e.apellido1, ' ', IFNULL(e.apellido2, '')) AS ApellidosEmpleado,
-       e.codigo_depto AS CodigoDepartamentoEmpleado,
-       IFNULL(d.nombre, 'Sin departamento') AS NombreDepartamento
-   FROM 
-       empleado e
-   RIGHT JOIN 
-       departamento d ON e.codigo_depto = d.codigo
-   WHERE 
-       e.codigo_depto IS NULL
-   ORDER BY 
-       NombreDepartamento ASC;
+   SELECT e.codigo AS ID,
+          e.nombre AS NombreEmpleado,
+          CONCAT(e.apellido1, ' ', IFNULL(e.apellido2, '')) AS ApellidosEmpleado,
+          e.codigo_depto AS IdDptoEmpleado,
+          NULL AS NombreDepto,
+          NULL AS PresupuestoDpto,
+          NULL AS GastosDpto
+   FROM empleado e
+   LEFT JOIN departamento d ON e.codigo_depto = d.codigo
+   WHERE d.codigo IS NULL
+   UNION
+   SELECT NULL AS ID,
+          NULL AS NombreEmpleado,
+          NULL AS ApellidosEmpleado,
+          d.codigo AS IdDptoEmpleado,
+          d.nombre AS NombreDepto,
+          d.presupuesto AS PresupuestoDpto,
+          d.gastos AS GastosDpto
+   FROM departamento d
+   LEFT JOIN empleado e ON e.codigo_depto = d.codigo
+   WHERE e.codigo IS NULL
+   ORDER BY NombreDepto ASC;
    ```
 
    ```
-   
+   +------+----------------+-------------------+----------------+-------------+-----------------+------------+
+   | ID   | NombreEmpleado | ApellidosEmpleado | IdDptoEmpleado | NombreDepto | PresupuestoDpto | GastosDpto |
+   +------+----------------+-------------------+----------------+-------------+-----------------+------------+
+   |   12 | Irene          | Salas Flores      |           NULL | NULL        |            NULL |       NULL |
+   |   13 | Juan Antonio   | Sáez Guerrero     |           NULL | NULL        |            NULL |       NULL |
+   | NULL | NULL           | NULL              |              6 | Proyectos   |               0 |          0 |
+   | NULL | NULL           | NULL              |              7 | Publicidad  |               0 |       1000 |
+   +------+----------------+-------------------+----------------+-------------+-----------------+------------+
+   4 rows in set (0,00 sec)
    ```
 
    
@@ -1151,11 +1186,16 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select sum(presupuesto) as presupuestototal from departamento;
    ```
 
    ```
-   
+   +------------------+
+   | presupuestototal |
+   +------------------+
+   |          1035000 |
+   +------------------+
+   1 row in set (0,00 sec)
    ```
 
    
@@ -1165,11 +1205,16 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select (sum(presupuesto)/2) as presupuestototal from departamento;
    ```
 
    ```
-   
+   +------------------+
+   | presupuestototal |
+   +------------------+
+   |           517500 |
+   +------------------+
+   1 row in set (0,00 sec)
    ```
 
    
@@ -1179,10 +1224,17 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select min(presupuesto) as presupuestoMinimo from departamento;
    ```
 
    ```
+   +-------------------+
+   | presupuestoMinimo |
+   +-------------------+
+   |                 0 |
+   +-------------------+
+   1 row in set (0,00 sec)
+   
    
    ```
 
@@ -1193,11 +1245,17 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select nombre, presupuesto from departamento where presupuesto = (select min(presupuesto) from departamento);
    ```
 
    ```
-   
+   +------------+-------------+
+   | nombre     | presupuesto |
+   +------------+-------------+
+   | Proyectos  |           0 |
+   | Publicidad |           0 |
+   +------------+-------------+
+   2 rows in set (0,00 sec)
    ```
 
    
@@ -1207,11 +1265,16 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select max(presupuesto) as presupuestoMaximo from departamento;
    ```
 
    ```
-   
+   +-------------------+
+   | presupuestoMaximo |
+   +-------------------+
+   |            375000 |
+   +-------------------+
+   1 row in set (0,00 sec)
    ```
 
    
@@ -1222,11 +1285,16 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select nombre, presupuesto from departamento where presupuesto = (select max(presupuesto) from departamento);
    ```
 
    ```
-   
+   +--------+-------------+
+   | nombre | presupuesto |
+   +--------+-------------+
+   | I+D    |      375000 |
+   +--------+-------------+
+   1 row in set (0,00 sec)
    ```
 
    
@@ -1236,11 +1304,16 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select count(codigo) as EmpleadosTotales from empleado;
    ```
 
    ```
-   
+   +------------------+
+   | EmpleadosTotales |
+   +------------------+
+   |               13 |
+   +------------------+
+   1 row in set (0,00 sec)
    ```
 
    
@@ -1251,11 +1324,16 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select count(codigo) as Empleados from empleado where apellido2 is not null;
    ```
 
    ```
-   
+   +-----------+
+   | Empleados |
+   +-----------+
+   |        11 |
+   +-----------+
+   1 row in set (0,00 sec)
    ```
 
    
@@ -1267,11 +1345,22 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select d.nombre, (select count(e.codigo) from empleado e where e.codigo_depto = d.codigo) as NumeroEmpleados from departamento d;
    ```
 
    ```
-   
+   +------------------+-----------------+
+   | nombre           | NumeroEmpleados |
+   +------------------+-----------------+
+   | Desarrollo       |               3 |
+   | Sistemas         |               3 |
+   | Recursos Humanos |               2 |
+   | Contabilidad     |               1 |
+   | I+D              |               2 |
+   | Proyectos        |               0 |
+   | Publicidad       |               0 |
+   +------------------+-----------------+
+   7 rows in set (0,00 sec)
    ```
 
    
@@ -1283,11 +1372,17 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
     
 
     ```mysql
-    
+    select d.nombre, (select count(e.codigo) from empleado e where e.codigo_depto = d.codigo) as NumeroEmpleados from departamento d where (select count(e.codigo) from empleado e where e.codigo_depto = d.codigo) > 2;
     ```
 
     ```
-    
+    +------------+-----------------+
+    | nombre     | NumeroEmpleados |
+    +------------+-----------------+
+    | Desarrollo |               3 |
+    | Sistemas   |               3 |
+    +------------+-----------------+
+    2 rows in set (0,00 sec)
     ```
 
     
@@ -1299,11 +1394,22 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
     
 
     ```mysql
-    
+    select d.nombre, (select count(e.codigo) from empleado e where e.codigo_depto = d.codigo) as NumeroEmpleados from departamento d;
     ```
 
     ```
-    
+    +------------------+-----------------+
+    | nombre           | NumeroEmpleados |
+    +------------------+-----------------+
+    | Desarrollo       |               3 |
+    | Sistemas         |               3 |
+    | Recursos Humanos |               2 |
+    | Contabilidad     |               1 |
+    | I+D              |               2 |
+    | Proyectos        |               0 |
+    | Publicidad       |               0 |
+    +------------------+-----------------+
+    7 rows in set (0,00 sec)
     ```
 
     
@@ -1314,11 +1420,17 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
     
 
     ```mysql
-    
+    select d.nombre, (select count(e.codigo) from empleado e where e.codigo_depto = d.codigo) as NumeroEmpleados from departamento d where presupuesto > 200000;
     ```
 
     ```
-    
+    +------------------+-----------------+
+    | nombre           | NumeroEmpleados |
+    +------------------+-----------------+
+    | Recursos Humanos |               2 |
+    | I+D              |               2 |
+    +------------------+-----------------+
+    2 rows in set (0,00 sec)
     ```
 
     
@@ -1331,11 +1443,16 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select count(e.codigo) Total_Empleados_Sistemas from empleado e where e.codigo_depto = (select d.codigo from departamento d where d.nombre = 'Sistemas');
    ```
 
    ```
-   
+   +--------------------------+
+   | Total_Empleados_Sistemas |
+   +--------------------------+
+   |                        3 |
+   +--------------------------+
+   1 row in set (0,00 sec)
    ```
 
    
@@ -1346,11 +1463,17 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select nombre, presupuesto from departamento where presupuesto = (select max(presupuesto) from departa
+   mento);
    ```
 
    ```
-   
+   +--------+-------------+
+   | nombre | presupuesto |
+   +--------+-------------+
+   | I+D    |      375000 |
+   +--------+-------------+
+   1 row in set (0,00 sec)
    ```
 
    
@@ -1362,11 +1485,17 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select nombre, presupuesto from departamento where presupuesto <= all (select presupuesto from departamento);
    ```
 
    ```
-   
+   +------------+-------------+
+   | nombre     | presupuesto |
+   +------------+-------------+
+   | Proyectos  |           0 |
+   | Publicidad |           0 |
+   +------------+-------------+
+   2 rows in set (0,00 sec)
    ```
 
    
@@ -1377,11 +1506,16 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select nombre, presupuesto from departamento where presupuesto >= all (select presupuesto from departamento);
    ```
 
    ```
-   
+   +--------+-------------+
+   | nombre | presupuesto |
+   +--------+-------------+
+   | I+D    |      375000 |
+   +--------+-------------+
+   1 row in set (0,00 sec)
    ```
 
    
@@ -1392,11 +1526,17 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select nombre, presupuesto from departamento where presupuesto <= all (select presupuesto from departamento);
    ```
 
    ```
-   
+   +------------+-------------+
+   | nombre     | presupuesto |
+   +------------+-------------+
+   | Proyectos  |           0 |
+   | Publicidad |           0 |
+   +------------+-------------+
+   2 rows in set (0,00 sec)
    ```
 
    
@@ -1407,10 +1547,20 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select d.nombre from departamento d where d.codigo = any (select e.codigo_depto from empleado e);
    ```
 
    ```
+   +------------------+
+   | nombre           |
+   +------------------+
+   | Desarrollo       |
+   | Sistemas         |
+   | Recursos Humanos |
+   | Contabilidad     |
+   | I+D              |
+   +------------------+
+   5 rows in set (0,00 sec)
    
    ```
 
@@ -1418,19 +1568,22 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
 
 7. Devuelve los nombres de los departamentos que no tienen empleados
    asociados. (Utilizando ALL o ANY).
-   Subconsultas con IN y NOT IN
-
-   
 
    ```mysql
-   
+   select d.nombre from departamento d where d.codigo != all (select e.codigo_depto from empleado e where e.codigo_depto is not null);
    ```
 
    ```
-   
+   +------------+
+   | nombre     |
+   +------------+
+   | Proyectos  |
+   | Publicidad |
+   +------------+
+   2 rows in set (0,00 sec)
    ```
 
-   
+   Subconsultas con IN y NOT IN
 
 8. Devuelve los nombres de los departamentos que tienen empleados
    asociados. (Utilizando IN o NOT IN).
@@ -1438,56 +1591,82 @@ select d.nombre from departamento d join empleado e where e.nif = "38382980M" an
    
 
    ```mysql
-   
+   select d.nombre from departamento d where d.codigo in (select e.codigo_depto from empleado e);
    ```
 
    ```
-   
+   +------------------+
+   | nombre           |
+   +------------------+
+   | Desarrollo       |
+   | Sistemas         |
+   | Recursos Humanos |
+   | Contabilidad     |
+   | I+D              |
+   +------------------+
+   5 rows in set (0,00 sec)
    ```
 
    
 
 9. Devuelve los nombres de los departamentos que no tienen empleados
    asociados. (Utilizando IN o NOT IN).
-   Subconsultas con EXISTS y NOT EXISTS
-
-   
 
    ```mysql
-   
+   select d.nombre from departamento d where d.codigo not in (select e.codigo_depto from empleado e where e.codigo_depto is not null);
    ```
 
    ```
-   
+   +------------+
+   | nombre     |
+   +------------+
+   | Proyectos  |
+   | Publicidad |
+   +------------+
+   2 rows in set (0,00 sec)
    ```
 
-   
+   Subconsultas con EXISTS y NOT EXISTS
 
-10. Devuelve los nombres de los departamentos que tienen empleados
-    asociados. (Utilizando EXISTS o NOT EXISTS).
+10. Devuelve los nombres de los departamentos que tienen empleados asociados. (Utilizando EXISTS o NOT EXISTS).
 
     
 
     ```mysql
-    
+    select d.nombre from departamento d where exists (select e.codigo_depto from empleado e where e.codigo_depto = d.codigo);
     ```
 
     ```
-    
+    +------------------+
+    | nombre           |
+    +------------------+
+    | Desarrollo       |
+    | Sistemas         |
+    | Recursos Humanos |
+    | Contabilidad     |
+    | I+D              |
+    +------------------+
+    5 rows in set (0,00 sec)
     ```
 
     
 
-11. Devuelve los nombres de los departamentos que tienen empleados
-    asociados. (Utilizando EXISTS o NOT EXISTS).
+11. Devuelve los nombres de los departamentos que (no) tienen empleados asociados. (Utilizando EXISTS o NOT EXISTS).
 
     
 
     ```mysql
-    
+    select d.nombre from departamento d where not exists (select e.codigo_depto from empleado e where e.codigo_depto = d.codigo);
     ```
 
     ```
+    +------------+
+    | nombre     |
+    +------------+
+    | Proyectos  |
+    | Publicidad |
+    +------------+
+    2 rows in set (0,00 sec)
     
     ```
 
